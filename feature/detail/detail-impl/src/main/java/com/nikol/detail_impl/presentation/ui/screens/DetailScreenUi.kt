@@ -32,7 +32,7 @@ import com.nikol.detail_impl.presentation.ui.components.DetailContentBody
 import com.nikol.detail_impl.presentation.ui.components.FloatingBackButton
 import com.nikol.detail_impl.presentation.viewModel.DetailRouter
 import com.nikol.detail_impl.presentation.viewModel.DetailViewModel
-import com.nikol.di.scope.viewModelWithRouter
+import com.nikol.di.scope.directViewModel
 import com.nikol.ui.state.SingleState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,7 +41,7 @@ fun DetailScreenUi(
     onBack: () -> Unit,
     onDetail: (detailScreen: DetailScreen) -> Unit
 ) {
-    val viewModel = viewModelWithRouter<DetailViewModel, DetailRouter> {
+    val viewModel = directViewModel<DetailViewModel, DetailRouter> {
         object : DetailRouter {
             override fun onBack() = onBack()
             override fun toContent(detailScreen: DetailScreen) = onDetail(detailScreen)

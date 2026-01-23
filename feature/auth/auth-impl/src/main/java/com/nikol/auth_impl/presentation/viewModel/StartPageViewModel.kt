@@ -9,18 +9,18 @@ import com.nikol.auth_impl.presentation.mvi.effect.StartPageEffect
 import com.nikol.auth_impl.presentation.mvi.intent.StartPageIntent
 import com.nikol.auth_impl.presentation.mvi.state.CreateSessionState
 import com.nikol.auth_impl.presentation.mvi.state.StartPageState
-import com.nikol.viewmodel.Router
-import com.nikol.viewmodel.BaseViewModel
-import com.nikol.viewmodel.intentDsl.intents
-import com.nikol.viewmodel.intentDsl.on
-import com.nikol.viewmodel.intentDsl.onLatest
-import com.nikol.viewmodel.intentDsl.onSingle
+import com.nikol.direct_android.middleware.LogMiddleware
+import com.nikol.direct_core.on
+import com.nikol.direct_core.onLatest
+import com.nikol.direct_core.onSingle
+import com.nikol.viewmodel.DirectRouter
+import com.nikol.viewmodel.DirectRouterViewModel
 
-interface StartPageRouter : Router {
+interface StartPageRouter : DirectRouter {
     fun main()
 }
 
-typealias StartPageComponent = BaseViewModel<StartPageIntent, StartPageState, StartPageEffect, StartPageRouter>
+typealias StartPageComponent = DirectRouterViewModel<StartPageIntent, StartPageState, StartPageEffect, StartPageRouter>
 
 class StartPageViewModel(
     private val createGuestSessionUseCase: CreateGuestSessionUseCase,
@@ -36,6 +36,7 @@ class StartPageViewModel(
     )
 
     override fun handleIntents() = intents {
+        install(LogMiddleware("StartPage"))
         onSingle<StartPageIntent.ContinueWithGuestAccount> {
             setState { copy(guestButtonState = CreateSessionState.Loading) }
             createGuestSessionUseCase(Unit).fold(

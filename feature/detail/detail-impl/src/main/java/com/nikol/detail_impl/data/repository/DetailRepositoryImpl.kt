@@ -18,20 +18,20 @@ class DetailRepositoryImpl(
     override suspend fun getMovie(detailParameter: DetailParameter): Either<DetailsError, ContentDetailDomain> {
         return when (val user = tokenRepository.getCurrentSessionState()) {
             is SessionState.Guest,
-            SessionState.None -> detailService.getDetailAboutMovie(detailParameter.id, user)
+            is SessionState.User -> detailService.getDetailAboutMovie(detailParameter.id, user)
                 .map { it.toDomain() }
 
-            is SessionState.User -> DetailsError.UserNotAuth.left()
+            is SessionState.None -> DetailsError.UserNotAuth.left()
         }
     }
 
     override suspend fun getTv(detailParameter: DetailParameter): Either<DetailsError, ContentDetailDomain> {
         return when (val user = tokenRepository.getCurrentSessionState()) {
             is SessionState.Guest,
-            SessionState.None -> detailService.getDetailAboutTv(detailParameter.id, user)
+            is SessionState.User -> detailService.getDetailAboutTv(detailParameter.id, user)
                 .map { it.toDomain() }
 
-            is SessionState.User -> DetailsError.UserNotAuth.left()
+            SessionState.None -> DetailsError.UserNotAuth.left()
         }
     }
 

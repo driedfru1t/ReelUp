@@ -1,6 +1,6 @@
 package plugins
 
-import com.android.build.gradle.LibraryExtension
+import com.android.build.api.dsl.LibraryExtension
 import extensions.libs
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
@@ -15,11 +15,12 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
         with(target) {
             with(pluginManager) {
                 apply(libs.plugins.android.library.get().pluginId)
-                apply(libs.plugins.kotlin.android.get().pluginId)
             }
 
             extensions.configure<LibraryExtension> {
-                compileSdk = Config.compileSdk
+                compileSdk {
+                    version = release(Config.compileSdk)
+                }
                 defaultConfig {
                     minSdk = Config.minSdk
                     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -37,14 +38,14 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 }
 
                 compileOptions {
-                    sourceCompatibility = JavaVersion.VERSION_17
-                    targetCompatibility = JavaVersion.VERSION_17
+                    sourceCompatibility = JavaVersion.VERSION_21
+                    targetCompatibility = JavaVersion.VERSION_21
                 }
             }
 
             tasks.withType<KotlinCompile>().configureEach {
                 compilerOptions {
-                    jvmTarget.set(JvmTarget.JVM_17)
+                    jvmTarget.set(JvmTarget.JVM_21)
                 }
             }
         }

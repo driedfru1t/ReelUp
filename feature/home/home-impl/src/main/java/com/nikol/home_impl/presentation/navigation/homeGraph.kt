@@ -2,16 +2,11 @@ package com.nikol.home_impl.presentation.navigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -23,7 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import com.nikol.detail_api.DetailScreen
 import com.nikol.di.scope.LinkedContext
 import com.nikol.di.scope.ScopedContext
-import com.nikol.di.scope.viewModelWithRouter
+import com.nikol.di.scope.directViewModel
 import com.nikol.home_api.destination.HomeGraph
 import com.nikol.home_impl.presentation.di.HomeComponent
 import com.nikol.home_impl.presentation.di.MovieComponent
@@ -59,7 +54,7 @@ fun NavGraphBuilder.homeGraph(
     composable<HomeGraph> {
         ScopedContext<HomeComponent> {
             val contentNavController = rememberNavController()
-            val homeViewModel = viewModelWithRouter<HomePageViewModel, TypeContentRouter> {
+            val homeViewModel = directViewModel<HomePageViewModel, TypeContentRouter> {
                 createTypeContentRouter(contentNavController)
             }
 

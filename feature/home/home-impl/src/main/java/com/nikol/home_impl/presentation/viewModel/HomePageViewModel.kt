@@ -1,20 +1,20 @@
 package com.nikol.home_impl.presentation.viewModel
 
+import com.nikol.direct_core.filter
 import com.nikol.home_impl.presentation.mvi.effect.HomeEffect
 import com.nikol.home_impl.presentation.mvi.intent.HomeIntent
 import com.nikol.home_impl.presentation.mvi.state.HomeState
-import com.nikol.viewmodel.Router
 import com.nikol.ui.model.MediaType
-import com.nikol.viewmodel.BaseViewModel
-import com.nikol.viewmodel.intentDsl.filter
-import com.nikol.viewmodel.intentDsl.intents
+import com.nikol.viewmodel.DirectRouter
+import com.nikol.viewmodel.DirectRouterViewModel
 
-interface TypeContentRouter : Router {
+interface TypeContentRouter : DirectRouter {
     fun navigateToMovie()
     fun navigateToTV()
 }
 
-class HomePageViewModel : BaseViewModel<HomeIntent, HomeState, HomeEffect, TypeContentRouter>() {
+class HomePageViewModel :
+    DirectRouterViewModel<HomeIntent, HomeState, HomeEffect, TypeContentRouter>() {
     override fun createInitialState() = HomeState(
         mediaType = MediaType.MOVIE
     )
@@ -22,7 +22,7 @@ class HomePageViewModel : BaseViewModel<HomeIntent, HomeState, HomeEffect, TypeC
     override fun handleIntents() = intents {
         setup<HomeIntent.ChangeTypeContent> {
             filter { intent -> intent.mediaType != uiState.value.mediaType }
-            handleConsistently { intent ->
+            serial { intent ->
                 setState { copy(mediaType = intent.mediaType) }
                 navigate {
                     when (intent.mediaType) {

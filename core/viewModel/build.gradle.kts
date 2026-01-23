@@ -15,5 +15,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(projects.core.navigation.navApi)
     implementation(libs.androidx.appcompat)
+
+    val directVersion = "0.1.0"
+
+    api("com.github.driedfru1t.Direct:direct-android:$directVersion")
 }
 

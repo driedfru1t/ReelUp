@@ -1,8 +1,8 @@
 package com.nikol.auth_impl.presentation.mvi.intent
 
-import com.nikol.viewmodel.UiIntent
+import com.nikol.direct_core.DirectIntent
 
-sealed interface StartPageIntent : UiIntent {
+sealed interface StartPageIntent : DirectIntent {
     data object CreateAccount : StartPageIntent
     data object LogIn : StartPageIntent
     data object ContinueWithGuestAccount : StartPageIntent

@@ -1,25 +1,23 @@
 package com.nikol.home_impl.presentation.viewModel
 
 import androidx.lifecycle.viewModelScope
+import com.nikol.direct_core.DirectEffect
+import com.nikol.direct_core.filter
+import com.nikol.direct_core.onLatest
+import com.nikol.direct_core.onSingle
 import com.nikol.home_impl.domain.parameters.ContentParameter
 import com.nikol.home_impl.domain.parameters.Period
 import com.nikol.home_impl.domain.useCase.GetTrendTvUseCase
-import com.nikol.home_impl.presentation.mvi.intent.MovieIntent
 import com.nikol.home_impl.presentation.mvi.intent.TVIntent
 import com.nikol.home_impl.presentation.mvi.state.TVState
 import com.nikol.home_impl.presentation.mvi.state.TrendContent
 import com.nikol.home_impl.presentation.ui.ext.toUi
-import com.nikol.home_impl.presentation.viewModel.MovieViewModel.Companion.LOAD_NOW_PLAYING
 import com.nikol.ui.model.MediaType
 import com.nikol.ui.state.ListState
-import com.nikol.viewmodel.BaseViewModel
-import com.nikol.viewmodel.Router
-import com.nikol.viewmodel.UiEffect
+import com.nikol.viewmodel.DirectRouter
+import com.nikol.viewmodel.DirectRouterViewModel
 import com.nikol.viewmodel.asyncWithoutOld
-import com.nikol.viewmodel.intentDsl.filter
-import com.nikol.viewmodel.intentDsl.intents
-import com.nikol.viewmodel.intentDsl.onLatest
-import com.nikol.viewmodel.intentDsl.onSingle
+import com.nikol.viewmodel.cancelAllJobs
 import com.nikol.viewmodel.launchWithoutOld
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Job
@@ -27,13 +25,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
-fun interface TVRouter : Router {
+fun interface TVRouter : DirectRouter {
     fun toDetail(id: String)
 }
 
 class TVViewModel(
     private val getTrendTvUseCase: GetTrendTvUseCase
-) : BaseViewModel<TVIntent, TVState, UiEffect, TVRouter>() {
+) : DirectRouterViewModel<TVIntent, TVState, DirectEffect, TVRouter>() {
 
     init {
         setIntent(TVIntent.LoadAllData)
@@ -58,7 +56,7 @@ class TVViewModel(
                 val currentBlock = uiState.value.trend
                 intent.period != currentBlock.period || currentBlock.state is ListState.Error
             }
-            handleLatest { intent ->
+            latest { intent ->
                 setState {
                     copy(
                         trend = trend.copy(
@@ -127,5 +125,10 @@ class TVViewModel(
 
     companion object {
         const val LOAD_POPULAR = "load_popular_job"
+    }
+
+    override fun onCleared() {
+        cancelAllJobs()
+        super.onCleared()
     }
 }

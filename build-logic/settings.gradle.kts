@@ -7,6 +7,7 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositories {
+        mavenLocal()
         google {
             content {
                 includeGroupByRegex("com\\.android.*")
@@ -15,6 +16,7 @@ dependencyResolutionManagement {
             }
         }
         mavenCentral()
+        maven { url = uri("https://jitpack.io") }
     }
     versionCatalogs {
         create("libs") {

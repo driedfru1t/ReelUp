@@ -1,6 +1,6 @@
 package plugins
 
-import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
+import com.android.build.api.dsl.ApplicationExtension
 import extensions.libs
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
@@ -15,10 +15,9 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
         with(target) {
             with(pluginManager) {
                 apply(libs.plugins.android.application.get().pluginId)
-                apply(libs.plugins.kotlin.android.get().pluginId)
             }
 
-            extensions.configure<BaseAppModuleExtension> {
+            extensions.configure<ApplicationExtension> {
                 namespace = "com.nikol.reelup"
                 compileSdk {
                     version = release(Config.compileSdk)
@@ -44,14 +43,14 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 }
 
                 compileOptions {
-                    sourceCompatibility = JavaVersion.VERSION_17
-                    targetCompatibility = JavaVersion.VERSION_17
+                    sourceCompatibility = JavaVersion.VERSION_21
+                    targetCompatibility = JavaVersion.VERSION_21
                 }
             }
 
             tasks.withType<KotlinCompile>().configureEach {
                 compilerOptions {
-                    jvmTarget.set(JvmTarget.JVM_17)
+                    jvmTarget.set(JvmTarget.JVM_21)
                 }
             }
         }

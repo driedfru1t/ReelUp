@@ -2,9 +2,9 @@ package com.nikol.detail_impl.presentation.mvi.intent
 
 import com.nikol.detail_api.ContentType
 import com.nikol.detail_api.DetailScreen
-import com.nikol.viewmodel.UiIntent
+import com.nikol.direct_core.DirectIntent
 
-sealed interface DetailIntent : UiIntent {
+sealed interface DetailIntent : DirectIntent {
     data class LoadAllData(val contentType: ContentType) : DetailIntent
     data object Update : DetailIntent
     data object NavigateBack : DetailIntent

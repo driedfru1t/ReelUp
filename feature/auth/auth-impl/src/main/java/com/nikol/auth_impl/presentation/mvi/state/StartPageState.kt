@@ -1,6 +1,6 @@
 package com.nikol.auth_impl.presentation.mvi.state
 
-import com.nikol.viewmodel.UiState
+import com.nikol.direct_core.DirectState
 
 data class StartPageState(
     val guestButtonState: CreateSessionState,
@@ -8,7 +8,7 @@ data class StartPageState(
     val login: String,
     val password: String,
     val showPassword: Boolean
-) : UiState
+) : DirectState
 
 sealed interface CreateSessionState {
     data object Error : CreateSessionState

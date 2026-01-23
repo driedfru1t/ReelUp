@@ -64,7 +64,7 @@ import com.nikol.auth_impl.presentation.mvi.intent.StartPageIntent
 import com.nikol.auth_impl.presentation.mvi.state.CreateSessionState
 import com.nikol.auth_impl.presentation.viewModel.StartPageRouter
 import com.nikol.auth_impl.presentation.viewModel.StartPageViewModel
-import com.nikol.di.scope.viewModelWithRouter
+import com.nikol.di.scope.directViewModel
 import com.nikol.ui.theme.ReelUpTheme
 import io.ktor.utils.io.InternalAPI
 
@@ -73,12 +73,11 @@ import io.ktor.utils.io.InternalAPI
 fun StartScreen(
     onMain: () -> Unit,
 ) {
-    val viewModel = viewModelWithRouter<StartPageViewModel, StartPageRouter> {
+    val viewModel = directViewModel<StartPageViewModel, StartPageRouter> {
         object : StartPageRouter {
             override fun main() = onMain()
         }
     }
-
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val intent =
@@ -194,7 +193,11 @@ fun StartScreenContent(
                     unfocusedBorderColor = Color.Transparent
                 ),
                 leadingIcon = {
-                    Icon(Icons.Default.Person, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(
+                        Icons.Default.Person,
+                        null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) })
@@ -218,7 +221,11 @@ fun StartScreenContent(
                     unfocusedBorderColor = Color.Transparent
                 ),
                 leadingIcon = {
-                    Icon(Icons.Default.Lock, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(
+                        Icons.Default.Lock,
+                        null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 },
                 trailingIcon = {
                     IconButton(onClick = switchPasswordVisibility, enabled = !isAnyLoading) {
@@ -230,7 +237,10 @@ fun StartScreenContent(
                     }
                 },
                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
                 keyboardActions = KeyboardActions(onDone = {
                     keyboardController?.hide()
                     if (!isAnyLoading) onLoginClick()
@@ -271,7 +281,10 @@ fun StartScreenContent(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp, pressedElevation = 0.dp)
+                elevation = ButtonDefaults.buttonElevation(
+                    defaultElevation = 2.dp,
+                    pressedElevation = 0.dp
+                )
             ) {
                 if (isLoginLoading) {
                     CircularProgressIndicator(
@@ -279,7 +292,10 @@ fun StartScreenContent(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Log In", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold))
+                    Text(
+                        "Log In",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+                    )
                 }
             }
 
@@ -289,14 +305,20 @@ fun StartScreenContent(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
                 Text(
                     text = "OR",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )
-                HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
             }
 
             Spacer(Modifier.height(16.dp))
@@ -319,7 +341,10 @@ fun StartScreenContent(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Continue as Guest", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold))
+                    Text(
+                        "Continue as Guest",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+                    )
                 }
             }
 
@@ -370,6 +395,7 @@ private fun EnterScreen() {
             switchPasswordVisibility = { })
     }
 }
+
 @Preview
 @Composable
 private fun EnterScreenLight() {

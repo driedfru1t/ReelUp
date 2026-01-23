@@ -12,6 +12,7 @@ dependencies {
     implementation(projects.core.security)
     implementation(projects.core.network)
     implementation(projects.core.di)
+    implementation(projects.core.ui)
     implementation(projects.core.navigation.navApi)
     implementation(projects.core.navigation.navImpl)
     implementation(projects.feature.detail.detailApi)

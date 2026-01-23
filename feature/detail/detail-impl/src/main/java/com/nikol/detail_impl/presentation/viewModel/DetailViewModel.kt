@@ -12,23 +12,23 @@ import com.nikol.detail_impl.presentation.mvi.intent.DetailIntent
 import com.nikol.detail_impl.presentation.mvi.state.DetailState
 import com.nikol.detail_impl.presentation.ui.ext.toUi
 import com.nikol.detail_impl.presentation.ui.model.DetailContent
+import com.nikol.direct_core.filter
+import com.nikol.direct_core.on
+import com.nikol.direct_core.onLatest
+import com.nikol.direct_core.onSingle
 import com.nikol.ui.state.SingleState
-import com.nikol.viewmodel.BaseViewModel
-import com.nikol.viewmodel.Router
-import com.nikol.viewmodel.intentDsl.filter
-import com.nikol.viewmodel.intentDsl.intents
-import com.nikol.viewmodel.intentDsl.on
-import com.nikol.viewmodel.intentDsl.onLatest
-import com.nikol.viewmodel.intentDsl.onSingle
+import com.nikol.viewmodel.DirectRouter
+import com.nikol.viewmodel.DirectRouterViewModel
 
-interface DetailRouter : Router {
+
+interface DetailRouter : DirectRouter {
     fun onBack()
     fun toContent(detailScreen: DetailScreen)
 }
 
 class DetailViewModel(
     savedStateHandle: SavedStateHandle, private val getDetailInfoUseCase: GetDetailInfoUseCase
-) : BaseViewModel<DetailIntent, DetailState, DetailEffect, DetailRouter>() {
+) : DirectRouterViewModel<DetailIntent, DetailState, DetailEffect, DetailRouter>() {
     private val routeArg = savedStateHandle.toRoute<DetailScreen>()
 
     private val type: ContentType = routeArg.contentType
@@ -74,7 +74,7 @@ class DetailViewModel(
 
         setup<DetailIntent.ToggleDescription> {
             filter { uiState.value.state is SingleState.Success }
-            handleConsistently {
+            serial {
                 val state = uiState.value.state as SingleState.Success<DetailContent>
                 setState {
                     copy(
@@ -102,14 +102,14 @@ class DetailViewModel(
 
         setup<DetailIntent.ToggleAction> {
             filter { uiState.value.state is SingleState.Success }
-            handleConsistently {
+            serial {
                 setState { copy(showBottomSheet = !showBottomSheet) }
             }
         }
 
         setup<DetailIntent.SeeTriller> {
             filter { uiState.value.state is SingleState.Success }
-            handleConsistently {
+            serial {
                 val content = (uiState.value.state as SingleState.Success).content
                 content.trailers.firstOrNull()?.let { video ->
                     setEffect { DetailEffect.SeeTrailerOnYouTube(video.key) }

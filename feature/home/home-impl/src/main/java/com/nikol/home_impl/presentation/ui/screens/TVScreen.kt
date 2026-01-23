@@ -12,14 +12,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nikol.detail_api.ContentType
-import com.nikol.di.scope.viewModelWithRouter
+import com.nikol.di.scope.directViewModel
 import com.nikol.home_impl.domain.parameters.Period
 import com.nikol.home_impl.presentation.mvi.intent.TVIntent
 import com.nikol.home_impl.presentation.mvi.state.TVState
-import com.nikol.ui.component.ContentSection
 import com.nikol.home_impl.presentation.ui.comonents.PeriodSelector
 import com.nikol.home_impl.presentation.viewModel.TVRouter
 import com.nikol.home_impl.presentation.viewModel.TVViewModel
+import com.nikol.ui.component.ContentSection
 import com.nikol.ui.model.Content
 import com.nikol.ui.model.MediaType
 
@@ -28,7 +28,7 @@ internal fun TVScreen(
     onBackPressed: () -> Unit,
     onDetail: (ContentType, Int) -> Unit
 ) {
-    val viewModel = viewModelWithRouter<TVViewModel, TVRouter> {
+    val viewModel = directViewModel<TVViewModel, TVRouter> {
         TVRouter { }
     }
 
