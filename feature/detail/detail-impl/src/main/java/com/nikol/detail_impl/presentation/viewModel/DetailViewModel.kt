@@ -1,7 +1,6 @@
 package com.nikol.detail_impl.presentation.viewModel
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.navigation.toRoute
 import com.nikol.detail_api.ContentType
 import com.nikol.detail_api.DetailScreen
 import com.nikol.detail_impl.domain.errors.DetailsError
@@ -12,13 +11,12 @@ import com.nikol.detail_impl.presentation.mvi.intent.DetailIntent
 import com.nikol.detail_impl.presentation.mvi.state.DetailState
 import com.nikol.detail_impl.presentation.ui.ext.toUi
 import com.nikol.detail_impl.presentation.ui.model.DetailContent
-import com.nikol.direct_core.filter
-import com.nikol.direct_core.on
-import com.nikol.direct_core.onLatest
-import com.nikol.direct_core.onSingle
 import com.nikol.ui.state.SingleState
 import com.nikol.viewmodel.DirectRouter
 import com.nikol.viewmodel.DirectRouterViewModel
+import direct.direct_core.filter
+import direct.direct_core.on
+import direct.direct_core.onLatest
 
 
 interface DetailRouter : DirectRouter {
@@ -27,12 +25,13 @@ interface DetailRouter : DirectRouter {
 }
 
 class DetailViewModel(
-    savedStateHandle: SavedStateHandle, private val getDetailInfoUseCase: GetDetailInfoUseCase
+    savedStateHandle: SavedStateHandle,
+    private val detailScreen: DetailScreen,
+    private val getDetailInfoUseCase: GetDetailInfoUseCase
 ) : DirectRouterViewModel<DetailIntent, DetailState, DetailEffect, DetailRouter>() {
-    private val routeArg = savedStateHandle.toRoute<DetailScreen>()
+    private val type: ContentType = detailScreen.contentType
+    private val id: Int = detailScreen.id
 
-    private val type: ContentType = routeArg.contentType
-    private val id: Int = routeArg.id
 
     init {
         setIntent(DetailIntent.LoadAllData(type))
@@ -46,8 +45,8 @@ class DetailViewModel(
     )
 
     override fun handleIntents() = intents {
-        onSingle<DetailIntent.NavigateBack> {
-            navigate { onBack() }
+        onNavigate<DetailIntent.NavigateBack>(isFinal = true) {
+            onBack()
         }
 
         onLatest<DetailIntent.LoadAllData> { intent ->
@@ -68,14 +67,12 @@ class DetailViewModel(
             })
         }
 
-        onLatest<DetailIntent.NavigateOtherDetail> {
-            navigate { toContent(it.contentType) }
-        }
+        onNavigate<DetailIntent.NavigateOtherDetail> { toContent(it.contentType) }
 
         setup<DetailIntent.ToggleDescription> {
-            filter { uiState.value.state is SingleState.Success }
+            filter { state.value.state is SingleState.Success }
             serial {
-                val state = uiState.value.state as SingleState.Success<DetailContent>
+                val state = state.value.state as SingleState.Success<DetailContent>
                 setState {
                     copy(
                         state = SingleState.Success(
@@ -101,16 +98,16 @@ class DetailViewModel(
         }
 
         setup<DetailIntent.ToggleAction> {
-            filter { uiState.value.state is SingleState.Success }
+            filter { state.value.state is SingleState.Success }
             serial {
                 setState { copy(showBottomSheet = !showBottomSheet) }
             }
         }
 
         setup<DetailIntent.SeeTriller> {
-            filter { uiState.value.state is SingleState.Success }
+            filter { state.value.state is SingleState.Success }
             serial {
-                val content = (uiState.value.state as SingleState.Success).content
+                val content = (state.value.state as SingleState.Success).content
                 content.trailers.firstOrNull()?.let { video ->
                     setEffect { DetailEffect.SeeTrailerOnYouTube(video.key) }
                 }

@@ -1,5 +1,9 @@
 package com.nikol.reelup.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -11,24 +15,26 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import com.nikol.auth_api.Auth
+import com.nikol.detail_api.DetailScreen
+import com.nikol.detail_impl.presentation.navigation.detailEntries
 import com.nikol.home_api.destination.HomeGraph
+import com.nikol.home_impl.presentation.navigation.homeEntries
 import com.nikol.nav_impl.commonDestination.MainGraph
-import com.nikol.nav_impl.navApi.MainFeatureApi
+import com.nikol.nav_impl.common_ui.CommonUiNavDisplay
+import com.nikol.nav_impl.common_ui.rememberTopLevelBackStack
 import com.nikol.search_api.SearchGraph
+import com.nikol.search_impl.presentation.navigation.searchEntries
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
 
 enum class MainTab(
-    val route: Any,
+    val route: NavKey,
     val title: String,
     val icon: androidx.compose.ui.graphics.vector.ImageVector
 ) {
@@ -36,65 +42,120 @@ enum class MainTab(
     Search(SearchGraph, "Search", Icons.Rounded.Search),
 }
 
-fun NavGraphBuilder.mainGraph(
-    rootNavController: NavController,
-    mainFeatures: List<MainFeatureApi>
+private val config = SerializersModule {
+    polymorphic(NavKey::class) {
+        subclass(Auth::class, Auth.serializer())
+        subclass(HomeGraph::class, HomeGraph.serializer())
+        subclass(DetailScreen::class, DetailScreen.serializer())
+        subclass(SearchGraph::class, SearchGraph.serializer())
+    }
+}
+
+private const val METADATA_TAB = "tab"
+private const val METADATA_RANGE = "range"
+fun EntryProviderScope<NavKey>.mainGraph(
+    onAuth: () -> Unit
 ) {
-    composable<MainGraph> {
-
-        val navController = rememberNavController()
-        val backStackEntry by navController.currentBackStackEntryAsState()
-        val currentDestination = backStackEntry?.destination
-
-        val currentTab = remember(currentDestination) {
-            MainTab.entries.firstOrNull { tab ->
-                currentDestination?.hierarchy?.any {
-                    it.route == tab.route::class.qualifiedName
-                } == true
-            } ?: MainTab.Home
-        }
-
+    entry<MainGraph> {
+        val backStack = rememberTopLevelBackStack(config, HomeGraph)
         Scaffold(
             bottomBar = {
                 MainGraphBottomBar(
                     tabs = MainTab.entries,
-                    currentTab = currentTab,
+                    currentTab = backStack.topLevelKey,
                     onTabClick = { tab ->
-                        if (tab == currentTab) {
-                            navController.popBackStack(
-                                route = tab.route,
-                                inclusive = false
-                            )
+                        if (tab.route == backStack.topLevelKey) {
+                            backStack.resetToRoot(backStack.topLevelKey)
                         } else {
-                            navController.navigate(tab.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
+                            backStack.addTopLevel(tab.route)
                         }
                     }
                 )
             }
         ) { innerPadding ->
 
-            NavHost(
-                navController = navController,
-                startDestination = HomeGraph,
+
+            CommonUiNavDisplay(
+                backStack = backStack,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = innerPadding.calculateBottomPadding())
-            ) {
+                    .padding(bottom = innerPadding.calculateBottomPadding()),
+                entryDecorator = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    rememberViewModelStoreNavEntryDecorator(),
+                ),
+                transitionSpec = {
+                    val initialIsTab = initialState.metadata[METADATA_TAB] as? Boolean ?: false
+                    val targetIsTab = targetState.metadata[METADATA_TAB] as? Boolean ?: false
 
-                mainFeatures.forEach {
-                    it.registerFeature(
-                        navController,
-                        this,
-                        rootNavController,
-                        modifier = Modifier.padding(top = innerPadding.calculateTopPadding())
-                    )
+                    val initialRange = initialState.metadata[METADATA_RANGE] as? Int ?: 0
+                    val targetRange = targetState.metadata[METADATA_RANGE] as? Int ?: 0
+
+                    when {
+                        // КЕЙС 1: Переход между табами (Pager style)
+                        initialIsTab && targetIsTab -> {
+                            val direction = if (targetRange > initialRange) 1 else -1
+                            slideInHorizontally(tween(400)) { it * direction } togetherWith
+                                    slideOutHorizontally(tween(400)) { -it * direction }
+                        }
+
+                        // КЕЙС 2: Открываем внутренний экран (iOS Push)
+                        // Новый экран заезжает справа, старый немного уходит влево (параллакс)
+                        !targetIsTab -> {
+                            slideInHorizontally(tween(400)) { it } togetherWith
+                                    slideOutHorizontally(tween(400)) { -it / 4 }
+                        }
+
+                        // КЕЙС 3: Возвращаемся с внутреннего экрана на таб (iOS Pop)
+                        // Старый экран уходит вправо, таб под ним возвращается из параллакса
+                        else -> {
+                            slideInHorizontally(tween(400)) { -it / 4 } togetherWith
+                                    slideOutHorizontally(tween(400)) { it }
+                        }
+                    }
+                },
+
+                popTransitionSpec = {
+                    val initialIsTab = initialState.metadata[METADATA_TAB] as? Boolean ?: false
+                    val targetIsTab = targetState.metadata[METADATA_TAB] as? Boolean ?: false
+
+                    val initialRange = initialState.metadata[METADATA_RANGE] as? Int ?: 0
+                    val targetRange = targetState.metadata[METADATA_RANGE] as? Int ?: 0
+
+                    when {
+                        // Если это табы — используем ту же логику пейджера
+                        initialIsTab && targetIsTab -> {
+                            val direction = if (targetRange > initialRange) 1 else -1
+                            slideInHorizontally(tween(400)) { it * direction } togetherWith
+                                    slideOutHorizontally(tween(400)) { -it * direction }
+                        }
+
+                        // Если мы закрываем экран и возвращаемся на таб (iOS Pop)
+                        else -> {
+                            slideInHorizontally(tween(400)) { -it / 4 } togetherWith
+                                    slideOutHorizontally(tween(400)) { it }
+                        }
+                    }
+                },
+                predictivePopTransitionSpec = {
+                    // Для предиктивного жеста "Назад" iOS-анимация подходит идеально:
+                    // Текущий экран прилипает к пальцу и уходит вправо
+                    slideInHorizontally(tween(400)) { -it / 4 } togetherWith
+                            slideOutHorizontally(tween(400)) { it }
                 }
+            ) {
+                homeEntries(
+                    onDetail = { backStack.add(it) },
+                    modifier = Modifier.padding(top = innerPadding.calculateTopPadding())
+                )
+                detailEntries(
+                    onBack = { backStack.removeLast() },
+                    onDetail = { backStack.add(it) }
+                )
+                searchEntries(
+                    onDetail = { backStack.add(it) },
+                    modifier = Modifier.padding(top = innerPadding.calculateTopPadding())
+                )
             }
         }
     }
@@ -103,13 +164,13 @@ fun NavGraphBuilder.mainGraph(
 @Composable
 fun MainGraphBottomBar(
     tabs: List<MainTab>,
-    currentTab: MainTab,
+    currentTab: NavKey,
     onTabClick: (MainTab) -> Unit
 ) {
     BottomAppBar {
         tabs.forEach { tab ->
             NavigationBarItem(
-                selected = tab == currentTab,
+                selected = tab.route == currentTab,
                 onClick = { onTabClick(tab) },
                 icon = {
                     Icon(

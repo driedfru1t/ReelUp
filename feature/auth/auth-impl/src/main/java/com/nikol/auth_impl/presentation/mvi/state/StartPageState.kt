@@ -1,6 +1,6 @@
 package com.nikol.auth_impl.presentation.mvi.state
 
-import com.nikol.direct_core.DirectState
+import direct.direct_core.DirectState
 
 data class StartPageState(
     val guestButtonState: CreateSessionState,

@@ -16,8 +16,4 @@ dependencies {
     implementation(projects.core.navigation.navImpl)
     implementation(projects.feature.auth.authApi)
     implementation(projects.core.viewModel)
-
-    val directVersion = "0.1.0"
-
-    implementation("com.github.driedfru1t.Direct:direct-android:$directVersion")
 }

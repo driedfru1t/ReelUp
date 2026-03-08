@@ -2,7 +2,7 @@ package com.nikol.detail_impl.presentation.mvi.intent
 
 import com.nikol.detail_api.ContentType
 import com.nikol.detail_api.DetailScreen
-import com.nikol.direct_core.DirectIntent
+import direct.direct_core.DirectIntent
 
 sealed interface DetailIntent : DirectIntent {
     data class LoadAllData(val contentType: ContentType) : DetailIntent

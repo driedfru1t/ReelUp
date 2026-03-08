@@ -34,21 +34,24 @@ import com.nikol.detail_impl.presentation.viewModel.DetailRouter
 import com.nikol.detail_impl.presentation.viewModel.DetailViewModel
 import com.nikol.di.scope.directViewModel
 import com.nikol.ui.state.SingleState
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreenUi(
     onBack: () -> Unit,
-    onDetail: (detailScreen: DetailScreen) -> Unit
+    onDetail: (detailScreen: DetailScreen) -> Unit,
+    screen: DetailScreen
 ) {
-    val viewModel = directViewModel<DetailViewModel, DetailRouter> {
-        object : DetailRouter {
-            override fun onBack() = onBack()
-            override fun toContent(detailScreen: DetailScreen) = onDetail(detailScreen)
+    val viewModel =
+        directViewModel<DetailViewModel, DetailRouter>(parameters = { parametersOf(screen) }) {
+            object : DetailRouter {
+                override fun onBack() = onBack()
+                override fun toContent(detailScreen: DetailScreen) = onDetail(detailScreen)
+            }
         }
-    }
     val context = LocalContext.current
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->

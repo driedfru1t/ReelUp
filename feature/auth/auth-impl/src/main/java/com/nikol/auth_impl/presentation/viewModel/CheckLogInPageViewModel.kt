@@ -4,11 +4,11 @@ import android.util.Log
 import com.nikol.auth_impl.domain.useCase.CheckLogInUseCase
 import com.nikol.auth_impl.presentation.mvi.intent.CheckPageIntent
 import com.nikol.auth_impl.presentation.mvi.state.CheckPageState
-import com.nikol.direct_core.DirectEffect
-import com.nikol.direct_core.debounce
-import com.nikol.direct_core.on
 import com.nikol.viewmodel.DirectRouter
 import com.nikol.viewmodel.DirectRouterViewModel
+import direct.direct_core.DirectEffect
+import direct.direct_core.debounce
+import direct.direct_core.on
 
 
 interface CheckRouter : DirectRouter {

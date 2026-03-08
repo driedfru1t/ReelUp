@@ -1,7 +1,7 @@
 package com.nikol.home_impl.presentation.mvi.intent
 
-import com.nikol.direct_core.DirectIntent
 import com.nikol.ui.model.MediaType
+import direct.direct_core.DirectIntent
 
 
 sealed interface HomeIntent : DirectIntent {

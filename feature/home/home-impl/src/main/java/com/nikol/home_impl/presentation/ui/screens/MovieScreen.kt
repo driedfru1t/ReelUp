@@ -31,7 +31,7 @@ internal fun MovieScreen(
         MovieRouter { }
     }
 
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     MovieScreenContent(
         state = state,
         onPeriodChanged = { period -> viewModel.setIntent(MovieIntent.ChangePeriodForTrend(period)) },

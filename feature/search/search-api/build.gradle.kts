@@ -11,4 +11,5 @@ android {
 dependencies {
     implementation(projects.core.navigation.navApi)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.navigation3.runtime)
 }

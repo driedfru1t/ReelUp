@@ -1,6 +1,6 @@
 package com.nikol.auth_impl.presentation.mvi.intent
 
-import com.nikol.direct_core.DirectIntent
+import direct.direct_core.DirectIntent
 
 sealed interface StartPageIntent : DirectIntent {
     data object CreateAccount : StartPageIntent

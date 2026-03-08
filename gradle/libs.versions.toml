@@ -10,16 +10,20 @@ junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 koin = "4.1.1"
-ktor = "3.3.3"
+ktor = "3.4.0"
 coil = "3.3.0"
 arrow = "2.2.1.1"
-kotlinxSerializationJson = "1.9.0"
+kotlinxSerializationJson = "1.10.0"
 appcompat = "1.7.1"
 material = "1.13.0"
 jetbrainsKotlinJvm = "2.3.0"
 kotlinxCoroutines = "1.10.2"
 datastorePreferences = "1.2.0"
 immutableCollections = "0.4.0"
+pagin = "3.3.6"
+nav3Core = "1.0.1"
+direct = "0.2.1"
+lifecycleViewmodelNav3 = "2.11.0-alpha01"
 
 [libraries]
 
@@ -43,7 +47,13 @@ androidx-material-icons-extended = { group = "androidx.compose.material", name =
 
 # AndroidX Navigation
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "nav3Core" }
+androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "nav3Core" }
+androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodelNav3" }
 
+
+pagin-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "pagin" }
+pagin-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "pagin" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -53,6 +63,7 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 
 # Dependency Injection - Koin
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
+koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
 
 
@@ -98,6 +109,8 @@ plugin-jetbrains-kotlin-jvm = { module = "org.jetbrains.kotlin.jvm:org.jetbrains
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
+direct-core = { group = "com.github.driedfru1t.Direct", name = "direct-core", version.ref = "direct" }
+direvt-viewModel = { group = "com.github.driedfru1t.Direct", name = "direct-viewModel", version.ref = "direct" }
 
 [plugins]
 # Android

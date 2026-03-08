@@ -1,12 +1,12 @@
 package com.nikol.home_impl.presentation.viewModel
 
-import com.nikol.direct_core.filter
 import com.nikol.home_impl.presentation.mvi.effect.HomeEffect
 import com.nikol.home_impl.presentation.mvi.intent.HomeIntent
 import com.nikol.home_impl.presentation.mvi.state.HomeState
 import com.nikol.ui.model.MediaType
 import com.nikol.viewmodel.DirectRouter
 import com.nikol.viewmodel.DirectRouterViewModel
+import direct.direct_core.filter
 
 interface TypeContentRouter : DirectRouter {
     fun navigateToMovie()
@@ -21,7 +21,7 @@ class HomePageViewModel :
 
     override fun handleIntents() = intents {
         setup<HomeIntent.ChangeTypeContent> {
-            filter { intent -> intent.mediaType != uiState.value.mediaType }
+            filter { intent -> intent.mediaType != state.value.mediaType }
             serial { intent ->
                 setState { copy(mediaType = intent.mediaType) }
                 navigate {

@@ -25,16 +25,16 @@ import com.nikol.ui.model.MediaType
 
 @Composable
 internal fun TVScreen(
-    onBackPressed: () -> Unit,
+    onBackPressed: () -> Unit = {},
     onDetail: (ContentType, Int) -> Unit
 ) {
     val viewModel = directViewModel<TVViewModel, TVRouter> {
         TVRouter { }
     }
 
-    BackHandler{ onBackPressed() }
 
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    val state by viewModel.state.collectAsStateWithLifecycle()
     TvScreenContent(
         state = state,
         onPeriodChanged = { period -> viewModel.setIntent(TVIntent.ChangePeriodForTrend(period)) },

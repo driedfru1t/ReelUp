@@ -8,20 +8,22 @@ import org.koin.compose.ComposeContextWrapper
 import org.koin.compose.LocalKoinApplication
 import org.koin.compose.LocalKoinScope
 import org.koin.core.annotation.KoinInternalApi
+import org.koin.core.parameter.ParametersDefinition
 import org.koin.core.scope.Scope
 
 
 @OptIn(KoinInternalApi::class)
 @Composable
 inline fun <reified C : Component> ScopedContext(
+    noinline parameters: ParametersDefinition? = null,
     crossinline content: @Composable Scope.() -> Unit
 ) {
-    val component: C = koinViewModel()
+    val component: C = koinViewModel(parameters = parameters)
     CompositionLocalProvider(
         LocalKoinApplication provides ComposeContextWrapper(component.scope.getKoin()),
         LocalKoinScope provides ComposeContextWrapper(component.scope),
     ) {
-        with(component.scope){
+        with(component.scope) {
             content()
         }
     }
@@ -40,7 +42,7 @@ inline fun <reified C : Component> Scope.LinkedContext(
         LocalKoinApplication provides ComposeContextWrapper(component.scope.getKoin()),
         LocalKoinScope provides ComposeContextWrapper(component.scope),
     ) {
-        with(component.scope){
+        with(component.scope) {
             content()
         }
     }

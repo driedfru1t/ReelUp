@@ -1,7 +1,7 @@
 package com.nikol.home_impl.presentation.mvi.intent
 
-import com.nikol.direct_core.DirectIntent
 import com.nikol.home_impl.domain.parameters.Period
+import direct.direct_core.DirectIntent
 
 
 sealed interface MovieIntent : DirectIntent {

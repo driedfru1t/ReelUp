@@ -79,7 +79,7 @@ fun StartScreen(
         }
     }
     val context = LocalContext.current
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val intent =
         remember { Intent(Intent.ACTION_VIEW, "https://www.themoviedb.org/signup".toUri()) }
 
@@ -94,11 +94,11 @@ fun StartScreen(
     }
 
     StartScreenContent(
-        login = uiState.login,
-        password = uiState.password,
-        loginState = uiState.sessionState,
-        guestState = uiState.guestButtonState,
-        isPasswordVisible = uiState.showPassword,
+        login = state.login,
+        password = state.password,
+        loginState = state.sessionState,
+        guestState = state.guestButtonState,
+        isPasswordVisible = state.showPassword,
         onLoginChange = { viewModel.setIntent(StartPageIntent.ChangeLogin(it)) },
         onPasswordChange = { viewModel.setIntent(StartPageIntent.ChangePassword(it)) },
         onLoginClick = { viewModel.setIntent(StartPageIntent.LogIn) },

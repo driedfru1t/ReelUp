@@ -1,122 +1,123 @@
 package com.nikol.home_impl.presentation.navigation
 
-import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import com.nikol.detail_api.DetailScreen
 import com.nikol.di.scope.LinkedContext
 import com.nikol.di.scope.ScopedContext
-import com.nikol.di.scope.directViewModel
 import com.nikol.home_api.destination.HomeGraph
 import com.nikol.home_impl.presentation.di.HomeComponent
 import com.nikol.home_impl.presentation.di.MovieComponent
 import com.nikol.home_impl.presentation.di.TVComponent
-import com.nikol.home_impl.presentation.mvi.intent.HomeIntent
 import com.nikol.home_impl.presentation.ui.comonents.HomeTopBar
 import com.nikol.home_impl.presentation.ui.screens.MovieScreen
 import com.nikol.home_impl.presentation.ui.screens.TVScreen
-import com.nikol.home_impl.presentation.viewModel.HomePageViewModel
-import com.nikol.home_impl.presentation.viewModel.TypeContentRouter
+import com.nikol.nav_impl.common_ui.CommonUiNavDisplay
+import com.nikol.nav_impl.common_ui.rememberTopLevelBackStack
 import com.nikol.ui.model.MediaType
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlin.text.get
 
-private fun createTypeContentRouter(navController: NavHostController): TypeContentRouter =
-    object : TypeContentRouter {
-        private fun navigateTab(route: Any) =
-            navController.navigate(route) {
-                popUpTo(navController.graph.findStartDestination().id) {
-                    saveState = true
-                }
-                launchSingleTop = true
-                restoreState = true
-            }
-
-        override fun navigateToMovie() = navigateTab(MoviePage)
-        override fun navigateToTV() = navigateTab(TVPage)
+private val config = SerializersModule {
+    polymorphic(NavKey::class) {
+        subclass(MoviePage::class, MoviePage.serializer())
+        subclass(TVPage::class, TVPage.serializer())
     }
+}
 
-
-fun NavGraphBuilder.homeGraph(
-    rootNavController: NavController?,
+fun EntryProviderScope<NavKey>.homeEntries(
+    onDetail: (DetailScreen) -> Unit,
     modifier: Modifier
 ) {
-    composable<HomeGraph> {
+    entry<HomeGraph>(
+        metadata = mapOf("tab" to true, "range" to 1)
+    ) {
+        val backStack = rememberTopLevelBackStack(config, MoviePage)
         ScopedContext<HomeComponent> {
-            val contentNavController = rememberNavController()
-            val homeViewModel = directViewModel<HomePageViewModel, TypeContentRouter> {
-                createTypeContentRouter(contentNavController)
-            }
-
-            val state by homeViewModel.uiState.collectAsStateWithLifecycle()
-
             Scaffold(
                 modifier = modifier
                     .fillMaxSize(),
                 topBar = {
-                    HomeTopBar(state.mediaType) { typeContent ->
-                        homeViewModel.setIntent(HomeIntent.ChangeTypeContent(typeContent))
+                    HomeTopBar(
+                        selectedType = when (backStack.topLevelKey) {
+                            is MoviePage -> MediaType.MOVIE
+                            is TVPage -> MediaType.TV
+                            else -> MediaType.MOVIE
+                        }
+                    ) { type ->
+                        val route = when (type) {
+                            MediaType.MOVIE -> MoviePage
+                            MediaType.TV -> TVPage
+                            MediaType.PERSON -> TODO()
+                        }
+                        backStack.addTopLevel(route)
                     }
                 }
             ) { innerPadding ->
-                NavHost(
-                    navController = contentNavController,
-                    startDestination = MoviePage,
+                CommonUiNavDisplay(
+                    backStack = backStack,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(top = innerPadding.calculateTopPadding()),
-                    enterTransition = {
-                        slideIntoContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                            animationSpec = tween(500)
-                        )
+                    entryDecorator = listOf(
+                        rememberSaveableStateHolderNavEntryDecorator(),
+                        rememberViewModelStoreNavEntryDecorator(),
+                    ),
+                    transitionSpec = {
+                        val initialIdx = initialState.metadata["index"] as? Int ?: 0
+                        val targetIdx = targetState.metadata["index"] as? Int ?: 0
+                        val direction = if (targetIdx > initialIdx) 1 else -1
+                        slideInHorizontally(animationSpec = tween(300)) { fullWidth -> fullWidth * direction } togetherWith
+                                slideOutHorizontally(animationSpec = tween(300)) { fullWidth -> -fullWidth * direction }
                     },
-                    exitTransition = {
-                        slideOutOfContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                            animationSpec = tween(500)
-                        )
+                    popTransitionSpec = {
+                        val initialIdx = initialState.metadata["index"] as? Int ?: 0
+                        val targetIdx = targetState.metadata["index"] as? Int ?: 0
+                        val direction = if (targetIdx > initialIdx) 1 else -1
+                        slideInHorizontally(animationSpec = tween(300)) { fullWidth -> fullWidth * direction } togetherWith
+                                slideOutHorizontally(animationSpec = tween(300)) { fullWidth -> -fullWidth * direction }
                     },
-                    popEnterTransition = {
-                        slideIntoContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.End,
-                            animationSpec = tween(500)
-                        )
-                    },
-                    popExitTransition = {
-                        slideOutOfContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.End,
-                            animationSpec = tween(500)
-                        )
+                    predictivePopTransitionSpec = {
+                        val initialIdx = initialState.metadata["index"] as? Int ?: 0
+                        val targetIdx = targetState.metadata["index"] as? Int ?: 0
+
+                        val direction = if (targetIdx > initialIdx) 1 else -1
+
+                        slideInHorizontally(animationSpec = tween(300)) { fullWidth -> fullWidth * direction } togetherWith
+                                slideOutHorizontally(animationSpec = tween(300)) { fullWidth -> -fullWidth * direction }
                     }
                 ) {
-                    composable<MoviePage> {
+                    entry<MoviePage>(
+                        metadata = mapOf("index" to 1)
+                    ) {
                         LinkedContext<MovieComponent> {
                             MovieScreen(
                                 onDetail = { contentType, id ->
-                                    rootNavController?.navigate(DetailScreen(contentType, id))
+                                    onDetail(DetailScreen(contentType, id))
                                 }
                             )
                         }
                     }
-                    composable<TVPage> {
+                    entry<TVPage>(
+                        metadata = mapOf("index" to 2)
+                    ) {
                         LinkedContext<TVComponent> {
                             TVScreen(
-                                onBackPressed = {
-                                    homeViewModel.setIntent(HomeIntent.ChangeTypeContent(MediaType.MOVIE))
-                                },
                                 onDetail = { contentType, id ->
-                                    rootNavController?.navigate(DetailScreen(contentType, id))
+                                    onDetail(DetailScreen(contentType, id))
                                 }
                             )
                         }

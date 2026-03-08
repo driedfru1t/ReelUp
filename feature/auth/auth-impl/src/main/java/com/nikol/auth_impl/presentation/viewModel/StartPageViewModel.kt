@@ -9,12 +9,11 @@ import com.nikol.auth_impl.presentation.mvi.effect.StartPageEffect
 import com.nikol.auth_impl.presentation.mvi.intent.StartPageIntent
 import com.nikol.auth_impl.presentation.mvi.state.CreateSessionState
 import com.nikol.auth_impl.presentation.mvi.state.StartPageState
-import com.nikol.direct_android.middleware.LogMiddleware
-import com.nikol.direct_core.on
-import com.nikol.direct_core.onLatest
-import com.nikol.direct_core.onSingle
 import com.nikol.viewmodel.DirectRouter
 import com.nikol.viewmodel.DirectRouterViewModel
+import direct.direct_core.on
+import direct.direct_core.onLatest
+import direct.direct_core.onSingle
 
 interface StartPageRouter : DirectRouter {
     fun main()
@@ -36,7 +35,7 @@ class StartPageViewModel(
     )
 
     override fun handleIntents() = intents {
-        install(LogMiddleware("StartPage"))
+        //install(LogMiddleware("StartPage"))
         onSingle<StartPageIntent.ContinueWithGuestAccount> {
             setState { copy(guestButtonState = CreateSessionState.Loading) }
             createGuestSessionUseCase(Unit).fold(
@@ -53,8 +52,8 @@ class StartPageViewModel(
         onSingle<StartPageIntent.LogIn> {
             setState { copy(sessionState = CreateSessionState.Loading) }
             val userCredential = UserCredential(
-                login = UserLogin(uiState.value.login),
-                password = UserPassword(uiState.value.password)
+                login = UserLogin(state.value.login),
+                password = UserPassword(state.value.password)
             )
             createSessionUseCase(userCredential).fold(
                 ifLeft = {
@@ -70,10 +69,11 @@ class StartPageViewModel(
         onLatest<StartPageIntent.CreateAccount> {
             setEffect { StartPageEffect.GoToBrowser }
         }
+
         on<StartPageIntent.ChangeLogin> { intent ->
             setState { copy(login = intent.login) }
-
         }
+
         on<StartPageIntent.ChangePassword> { intent ->
             setState { copy(password = intent.password) }
         }

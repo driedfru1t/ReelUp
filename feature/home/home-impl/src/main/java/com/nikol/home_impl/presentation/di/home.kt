@@ -11,15 +11,12 @@ import com.nikol.home_impl.domain.repository.TvRepository
 import com.nikol.home_impl.domain.useCase.GetNowPlayingMoviesUseCase
 import com.nikol.home_impl.domain.useCase.GetTrendMoviesUseCase
 import com.nikol.home_impl.domain.useCase.GetTrendTvUseCase
-import com.nikol.home_impl.presentation.navigation.HomeFeature
 import com.nikol.home_impl.presentation.viewModel.HomePageViewModel
 import com.nikol.home_impl.presentation.viewModel.MovieViewModel
 import com.nikol.home_impl.presentation.viewModel.TVViewModel
-import com.nikol.nav_impl.navApi.MainFeatureApi
 import com.nikol.nav_impl.scopedNavigation.Component
 import com.nikol.nav_impl.scopedNavigation.component
 import org.koin.core.module.dsl.scopedOf
-import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -52,9 +49,6 @@ private val tvModule = module {
 val homeModule = module {
 
     includes(tvModule, movieModule)
-
-    singleOf(::HomeFeature) bind MainFeatureApi::class
-
     component { HomeComponent() }
     scope<HomeComponent> {
         viewModelOf(::HomePageViewModel)

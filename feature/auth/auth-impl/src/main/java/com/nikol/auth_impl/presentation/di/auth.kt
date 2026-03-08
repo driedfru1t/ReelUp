@@ -7,16 +7,12 @@ import com.nikol.auth_impl.domain.repository.AuthRepository
 import com.nikol.auth_impl.domain.useCase.CheckLogInUseCase
 import com.nikol.auth_impl.domain.useCase.CreateGuestSessionUseCase
 import com.nikol.auth_impl.domain.useCase.CreateSessionUseCase
-import com.nikol.auth_impl.presentation.nav.AuthFeature
 import com.nikol.auth_impl.presentation.viewModel.CheckLogInPageViewModel
 import com.nikol.auth_impl.presentation.viewModel.StartPageViewModel
-import com.nikol.nav_impl.navApi.NavApi
-import com.nikol.nav_impl.navApi.RootFeatureApi
 import com.nikol.nav_impl.scopedNavigation.Component
 import com.nikol.nav_impl.scopedNavigation.component
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.scopedOf
-import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -45,9 +41,6 @@ val checkPageModule = module {
 val authModule = module {
 
     includes(startPageModule, checkPageModule)
-
-    singleOf(::AuthFeature) bind RootFeatureApi::class
-
     component { AuthComponent() }
     scope<AuthComponent> {
         scopedOf(::AuthServiceImpl) bind AuthService::class

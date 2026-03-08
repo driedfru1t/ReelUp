@@ -1,6 +1,7 @@
 package com.nikol.search_api
 
+import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object SearchGraph
+data object SearchGraph : NavKey
