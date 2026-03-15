@@ -49,5 +49,15 @@ class TopLevelBackStack<T : NavKey>(
         }
     }
 
+    fun resetToRoot(key: T) {
+        val stack = topLevelStacks[key]
+        if (stack != null && stack.size > 1) {
+            val root = stack.first()
+            stack.clear()
+            stack.add(root)
+        }
+        topLevelKey = key
+    }
+
     fun getStacksData(): Map<T, List<T>> = topLevelStacks.mapValues { it.value.toList() }
 }

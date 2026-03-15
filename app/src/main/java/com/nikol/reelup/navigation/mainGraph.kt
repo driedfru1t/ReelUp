@@ -92,22 +92,18 @@ fun EntryProviderScope<NavKey>.mainGraph(
                     val targetRange = targetState.metadata[METADATA_RANGE] as? Int ?: 0
 
                     when {
-                        // КЕЙС 1: Переход между табами (Pager style)
                         initialIsTab && targetIsTab -> {
                             val direction = if (targetRange > initialRange) 1 else -1
                             slideInHorizontally(tween(400)) { it * direction } togetherWith
                                     slideOutHorizontally(tween(400)) { -it * direction }
                         }
 
-                        // КЕЙС 2: Открываем внутренний экран (iOS Push)
-                        // Новый экран заезжает справа, старый немного уходит влево (параллакс)
                         !targetIsTab -> {
                             slideInHorizontally(tween(400)) { it } togetherWith
                                     slideOutHorizontally(tween(400)) { -it / 4 }
                         }
 
-                        // КЕЙС 3: Возвращаемся с внутреннего экрана на таб (iOS Pop)
-                        // Старый экран уходит вправо, таб под ним возвращается из параллакса
+
                         else -> {
                             slideInHorizontally(tween(400)) { -it / 4 } togetherWith
                                     slideOutHorizontally(tween(400)) { it }
@@ -123,14 +119,12 @@ fun EntryProviderScope<NavKey>.mainGraph(
                     val targetRange = targetState.metadata[METADATA_RANGE] as? Int ?: 0
 
                     when {
-                        // Если это табы — используем ту же логику пейджера
                         initialIsTab && targetIsTab -> {
                             val direction = if (targetRange > initialRange) 1 else -1
                             slideInHorizontally(tween(400)) { it * direction } togetherWith
                                     slideOutHorizontally(tween(400)) { -it * direction }
                         }
 
-                        // Если мы закрываем экран и возвращаемся на таб (iOS Pop)
                         else -> {
                             slideInHorizontally(tween(400)) { -it / 4 } togetherWith
                                     slideOutHorizontally(tween(400)) { it }
@@ -138,8 +132,6 @@ fun EntryProviderScope<NavKey>.mainGraph(
                     }
                 },
                 predictivePopTransitionSpec = {
-                    // Для предиктивного жеста "Назад" iOS-анимация подходит идеально:
-                    // Текущий экран прилипает к пальцу и уходит вправо
                     slideInHorizontally(tween(400)) { -it / 4 } togetherWith
                             slideOutHorizontally(tween(400)) { it }
                 }

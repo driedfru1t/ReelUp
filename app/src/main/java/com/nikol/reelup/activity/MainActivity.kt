@@ -37,19 +37,13 @@ class MainActivity : ComponentActivity() {
                             rememberViewModelStoreNavEntryDecorator(),
                         ),
                         transitionSpec = {
-                            // Новый экран заезжает справа (от 'width' до 0)
-                            // Старый экран уезжает влево на 1/4 своей ширины (эффект параллакса)
                             slideInHorizontally(animationSpec = tween(400)) { width -> width } togetherWith
                                     slideOutHorizontally(animationSpec = tween(400)) { width -> -width / 4 }
                         },
-                        // Анимация при движении НАЗАД (Pop)
                         popTransitionSpec = {
-                            // Предыдущий экран возвращается из параллакса (от -1/4 ширины до 0)
-                            // Текущий экран уезжает вправо (от 0 до 'width')
                             slideInHorizontally(animationSpec = tween(400)) { width -> -width / 4 } togetherWith
                                     slideOutHorizontally(animationSpec = tween(400)) { width -> width }
                         },
-                        // Анимация для Predictive Back (жест назад пальцем)
                         predictivePopTransitionSpec = {
                             slideInHorizontally(animationSpec = tween(400)) { width -> -width / 4 } togetherWith
                                     slideOutHorizontally(animationSpec = tween(400)) { width -> width }
