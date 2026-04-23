@@ -67,13 +67,11 @@ fun SearchScreen(
     val isLoading = pagedItems.loadState.refresh is LoadState.Loading
             && state.searchQuery.isNotBlank()
 
-    // 1. Получаем FocusManager на уровне экрана
     val focusManager = LocalFocusManager.current
 
     Scaffold(
         modifier = modifier
             .fillMaxSize()
-            // 2. Снимаем фокус и прячем клавиатуру при тапе в любую пустую область
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {
                     focusManager.clearFocus()
@@ -94,7 +92,6 @@ fun SearchScreen(
             pagedItems = pagedItems,
             searchQuery = state.searchQuery,
             onItemClick = { item ->
-                // Перед переходом на другой экран тоже полезно убрать фокус
                 focusManager.clearFocus()
                 viewModel.setIntent(
                     SearchIntent.GoToDetail(contentType = item.type, id = item.id)
@@ -154,26 +151,6 @@ fun SearchTopBar(
                     focusManager.clearFocus()
                 })
             )
-
-//            // Восстановил красивую анимацию загрузки поверх нижней границы
-//            AnimatedVisibility(
-//                visible = isLoading,
-//                enter = fadeIn(),
-//                exit = fadeOut(),
-//                modifier = Modifier
-//                    .align(Alignment.BottomCenter)
-//                    .padding(horizontal = 2.dp)
-//                    .padding(bottom = 2.dp)
-//            ) {
-//                LinearProgressIndicator(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .height(3.dp)
-//                        .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)),
-//                    color = MaterialTheme.colorScheme.primary,
-//                    trackColor = Color.Transparent
-//                )
-//            }
         }
     }
 }
@@ -188,11 +165,9 @@ fun SearchContent(
     val isRefreshLoading = pagedItems.loadState.refresh is LoadState.Loading
     val isRefreshError = pagedItems.loadState.refresh is LoadState.Error
 
-    // Для скрытия клавиатуры при скролле
     val focusManager = LocalFocusManager.current
     val listState = rememberLazyListState()
 
-    // 3. Супер-фича: скрываем клавиатуру, как только пользователь начал листать список
     LaunchedEffect(listState.isScrollInProgress) {
         if (listState.isScrollInProgress) {
             focusManager.clearFocus()
@@ -201,7 +176,7 @@ fun SearchContent(
 
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(
-            state = listState, // Привязываем состояние списка
+            state = listState,
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.fillMaxSize()
@@ -233,7 +208,6 @@ fun SearchContent(
             }
         }
 
-        // --- СОСТОЯНИЯ ПУСТОГО ЭКРАНА ---
         if (pagedItems.itemCount == 0) {
             if (searchQuery.isBlank()) {
                 EmptyStateMessage("Начните вводить текст для поиска...")
@@ -268,7 +242,6 @@ private fun EmptyStateMessage(text: String) {
     }
 }
 
-// SearchResultItem остается без изменений
 @Composable
 fun SearchResultItem(
     item: SearchResultDomain,
@@ -312,7 +285,7 @@ fun SearchResultItem(
                     shape = RoundedCornerShape(4.dp)
                 ) {
                     Text(
-                        text = item.type.name, // MOVIE / TV
+                        text = item.type.name,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)

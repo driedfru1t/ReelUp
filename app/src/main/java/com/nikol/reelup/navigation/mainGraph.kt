@@ -85,51 +85,13 @@ fun EntryProviderScope<NavKey>.mainGraph(
                     rememberViewModelStoreNavEntryDecorator(),
                 ),
                 transitionSpec = {
-                    val initialIsTab = initialState.metadata[METADATA_TAB] as? Boolean ?: false
-                    val targetIsTab = targetState.metadata[METADATA_TAB] as? Boolean ?: false
-
-                    val initialRange = initialState.metadata[METADATA_RANGE] as? Int ?: 0
-                    val targetRange = targetState.metadata[METADATA_RANGE] as? Int ?: 0
-
-                    when {
-                        initialIsTab && targetIsTab -> {
-                            val direction = if (targetRange > initialRange) 1 else -1
-                            slideInHorizontally(tween(400)) { it * direction } togetherWith
-                                    slideOutHorizontally(tween(400)) { -it * direction }
-                        }
-
-                        !targetIsTab -> {
-                            slideInHorizontally(tween(400)) { it } togetherWith
-                                    slideOutHorizontally(tween(400)) { -it / 4 }
-                        }
-
-
-                        else -> {
-                            slideInHorizontally(tween(400)) { -it / 4 } togetherWith
-                                    slideOutHorizontally(tween(400)) { it }
-                        }
-                    }
+                    slideInHorizontally(animationSpec = tween(400)) { it } togetherWith
+                            slideOutHorizontally(animationSpec = tween(400)) { -it / 4 }
                 },
 
                 popTransitionSpec = {
-                    val initialIsTab = initialState.metadata[METADATA_TAB] as? Boolean ?: false
-                    val targetIsTab = targetState.metadata[METADATA_TAB] as? Boolean ?: false
-
-                    val initialRange = initialState.metadata[METADATA_RANGE] as? Int ?: 0
-                    val targetRange = targetState.metadata[METADATA_RANGE] as? Int ?: 0
-
-                    when {
-                        initialIsTab && targetIsTab -> {
-                            val direction = if (targetRange > initialRange) 1 else -1
-                            slideInHorizontally(tween(400)) { it * direction } togetherWith
-                                    slideOutHorizontally(tween(400)) { -it * direction }
-                        }
-
-                        else -> {
-                            slideInHorizontally(tween(400)) { -it / 4 } togetherWith
-                                    slideOutHorizontally(tween(400)) { it }
-                        }
-                    }
+                    slideInHorizontally(animationSpec = tween(400)) { -it / 4 } togetherWith
+                            slideOutHorizontally(animationSpec = tween(400)) { it }
                 },
                 predictivePopTransitionSpec = {
                     slideInHorizontally(tween(400)) { -it / 4 } togetherWith
